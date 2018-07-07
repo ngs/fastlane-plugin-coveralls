@@ -5,7 +5,10 @@ module Fastlane
   module Actions
     class CoverallsAction < Action
       def self.run(params)
-        UI.message("The coveralls plugin is working!")
+        Actions.verify_gem!('xccoveralls')
+        require 'xccoveralls'
+
+        Xccoveralls::Runner.new(params).run!
       end
 
       def self.description
@@ -16,31 +19,43 @@ module Fastlane
         ["Atsushi Nagase"]
       end
 
-      def self.return_value
-        # If your method provides a return value, you can describe here what it does
-      end
-
       def self.details
-        # Optional:
-        "Send coverage information to Coveralls"
+        "Send coverage information to Coveralls\n" \
+          "Make sure `Gather coverage` is turned on for your test target.\n" \
+          "More informmation: [https://github.com/ngs/xccoveralls](https://github.com/ngs/xccoveralls)"
       end
 
       def self.available_options
-        [
-          # FastlaneCore::ConfigItem.new(key: :your_option,
-          #                         env_name: "COVERALLS_YOUR_OPTION",
-          #                      description: "A description of your option",
-          #                         optional: false,
-          #                             type: String)
-        ]
+        return [] unless Helper.mac?
+        require 'fastlane/core_ext/bundler_monkey_patch'
+
+        begin
+          Gem::Specification.find_by_name('xccoveralls')
+        rescue Gem::LoadError
+          return []
+        end
+
+        require 'xccoveralls'
+        Xccoveralls::Options.available_options
       end
 
       def self.is_supported?(platform)
-        # Adjust this if your plugin only works for a particular platform (iOS vs. Android, for example)
-        # See: https://docs.fastlane.tools/advanced/#control-configuration-by-lane-and-by-platform
-        #
-        # [:ios, :mac, :android].include?(platform)
-        true
+        [:ios, :mac].include?(platform)
+      end
+
+      def self.example_code
+        [
+          'coveralls(
+            repo_token: "(secret)",
+            derived_data_path: "your/custom/DerivedData",
+            source_path: "your/src",
+            ignorefile_path: "your/src/.coverallsignore"
+          )'
+        ]
+      end
+
+      def self.category
+        :testing
       end
     end
   end

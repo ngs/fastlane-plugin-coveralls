@@ -1,12 +1,7 @@
-# Ruby CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-ruby/ for more details
-#
 version: 2
 jobs:
-  build:
+  tests:
     docker:
-      # specify the version you desire here
        - image: circleci/ruby:2.4.2
 
     working_directory: ~/repo
@@ -14,11 +9,9 @@ jobs:
     steps:
       - checkout
 
-      # Download and cache dependencies
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "Gemfile" }}
-          # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
       - run:
@@ -30,14 +23,45 @@ jobs:
             - ./vendor
           key: v1-dependencies-{{ checksum "Gemfile" }}
 
-      # run tests!
       - run:
           name: run tests
           command: bundle exec rake
 
-      # collect reports
+      - run:
+          name: build gem
+          command: bundle exec rake build
+
       - store_test_results:
           path: ~/repo/test-results
       - store_artifacts:
           path: ~/repo/test-results
           destination: test-results
+      - store_artifacts:
+          path: ~/repo/pkg
+          destination: pkg
+
+  release:
+    docker:
+      - image: circleci/ruby:2.4.2
+    steps:
+      - checkout
+      - run: gem build fastlane-plugin-coveralls.gemspec
+      - run: .circleci/check-tag.sh
+      - run: .circleci/export-api-key.sh
+      - run: gem push fastlane-plugin-coveralls*.gem
+      - store_artifacts:
+          path: fastlane-plugin-coveralls*.gem
+
+workflows:
+  version: 2
+  tests:
+    jobs:
+      - tests
+  release:
+    jobs:
+      - release:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+$/

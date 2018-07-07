@@ -1,6 +1,8 @@
 # coveralls plugin
 
 [![fastlane Plugin Badge](https://rawcdn.githack.com/fastlane/fastlane/master/fastlane/assets/plugin-badge.svg)](https://rubygems.org/gems/fastlane-plugin-coveralls)
+[![Gem Version](https://badge.fury.io/rb/astlane-plugin-coveralls.png)](https://rubygems.org/gems/fastlane-plugin-coveralls)
+[![CircleCI](https://circleci.com/gh/ngs/fastlane-plugin-coveralls.svg?style=svg)](https://circleci.com/gh/ngs/fastlane-plugin-coveralls)
 
 ## Getting Started
 
