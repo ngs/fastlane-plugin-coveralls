@@ -7,8 +7,9 @@ module Fastlane
       def self.run(params)
         Actions.verify_gem!('xccoveralls')
         require 'xccoveralls'
+        require 'xccoveralls/runner'
 
-        Xccoveralls::Runner.new(params).run!
+        Xccoveralls::Runner.new(params.values).run!
       end
 
       def self.description
@@ -35,7 +36,7 @@ module Fastlane
           return []
         end
 
-        require 'xccoveralls'
+        require 'xccoveralls/options'
         Xccoveralls::Options.available_options
       end
 
